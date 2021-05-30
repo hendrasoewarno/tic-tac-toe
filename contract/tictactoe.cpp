@@ -2,20 +2,20 @@
 
 using namespace eosio;
 
-TABLE pool_record {
-  name host;
-  name challenger;
-
-  //we will use host as scope
-  uint64_t primary_key() const {return challenger.value;}
-  EOSLIB_SERIALIZE(pool_record, (host)(challenger))
-};
-
-typedef eosio::multi_index<name("pool"), pool_record> pool_index;
-
 // The contract
 CONTRACT tictactoe : public contract {
   public:
+
+    TABLE pool_record {
+      name host;
+      name challenger;
+
+      //we will use host as scope
+      uint64_t primary_key() const {return challenger.value;}
+      EOSLIB_SERIALIZE(pool_record, (host)(challenger))
+    };
+    typedef eosio::multi_index<name("pool"), pool_record> pool_index;
+
     // Use contract's constructor
     using contract::contract;
 

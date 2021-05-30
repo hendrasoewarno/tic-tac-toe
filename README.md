@@ -55,6 +55,8 @@ cleos push action tictactoe welcome '[bob, jane]' -p bob
 #Exercise 2
 #Ok
 cleos push action tictactoe create '[jane, bob]' -p bob
+cleos get table tictactoe bob pool
+
 #pair already exists
 cleos push action tictactoe create '[jane, bob]' -p bob
 #pair already exists
@@ -66,6 +68,8 @@ or
 cleos push action tictactoe close '[bob, jane]' -p jane
 #pair not found
 cleos push action tictactoe close '[jane, bob]' -p bob
+
+cleos get table tictactoe jane pool
 
 ```
 
