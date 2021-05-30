@@ -33,6 +33,9 @@ This will produce `tictactoe.abi` and `tictactoe.wasm`.
 Run this in a terminal:
 
 ```
+rm -rf ~/eosio/chain
+nodeos --config-dir ~/eosio/chain/config --data-dir ~/eosio/chain/data -e -p eosio --plugin eosio::chain_api_plugin --contracts-console
+
 cleos create account eosio tictactoe EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos set code tictactoe tictactoe.wasm
 cleos set abi tictactoe tictactoe.abi
@@ -69,7 +72,7 @@ cleos push action tictactoe close '[bob, jane]' -p jane
 #pair not found
 cleos push action tictactoe close '[jane, bob]' -p bob
 
-cleos get table tictactoe jane pool
+cleos get table tictactoe tictactoe pool
 
 ```
 
