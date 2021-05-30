@@ -30,23 +30,39 @@ CONTRACT tictactoe : public contract {
         check(host!=challenger, "Could not challenge youself!");
         //check(is_account(challenger),"challenger account not found");
 
-        pool_index _pool(get_self(), host.value); //host as scope
-        auto itr = _pool.find(challenger.value); //just find challenger in host
+        //find host in challenger scope
+        pool_index _poolc(get_self(), challenger.value); //challenger as scope
+        auto itrc = _poolc.find(host.value); //just find host in challenger
+        check(itrc==_poolc.end(), "pair already exists!"); //if found
 
-        check(itr==_pool.end(), "pair already exists!"); //if found
+        //find challenger in host scope
+        pool_index _poolh(get_self(), host.value); //host as scope
+        auto itrh = _poolh.find(challenger.value); //just find challenger in host
+        check(itrh==_poolh.end(), "pair already exists!"); //if found        
 
         //ram charge to action caller
-        _pool.emplace(get_first_receiver(), [&](auto& pair) {
+        _poolh.emplace(get_first_receiver(), [&](auto& pair) {
           pair.host = host;
           pair.challenger = challenger;
       });
     }
 
     ACTION close(name challenger, name host) {
-        pool_index _pool(get_self(), host.value);
-        auto itr = _pool.find(challenger.value);
-        check(itr!=_pool.end(), "pair does not exists!"); //if not found
-        _pool.erase(itr);
+        //find challenger in host scope
+        pool_index _poolh(get_self(), host.value);
+        auto itrh = _poolh.find(challenger.value);
+        if (itrh!=_poolh.end())
+          _poolh.erase(itrh);
+        else {
+          //find host in challenger scope
+          pool_index _poolc(get_self(), challenger.value);
+          auto itrc = _poolc.find(host.value);
+          if (itrc!=_poolc.end())
+            _poolc.erase(itrc);
+          else
+            check(false, "pair not found!");
+
+        }
     }    
 
   private:

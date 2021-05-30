@@ -45,10 +45,27 @@ Run this in a terminal:
 ```
 cleos create account eosio bob EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 cleos create account eosio jane EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+
+#Exercise 1
 #Ok
 cleos push action tictactoe welcome '[tictactoe, bob]' -p tictactoe
 #Missing required authority
 cleos push action tictactoe welcome '[bob, jane]' -p bob
+
+#Exercise 2
+#Ok
+cleos push action tictactoe create '[jane, bob]' -p bob
+#pair already exists
+cleos push action tictactoe create '[jane, bob]' -p bob
+#pair already exists
+cleos push action tictactoe create '[bob, jane]' -p jane
+
+#Ok
+cleos push action tictactoe close '[jane, bob]' -p bob
+or
+cleos push action tictactoe close '[bob, jane]' -p jane
+#pair not found
+cleos push action tictactoe close '[jane, bob]' -p bob
 
 ```
 
