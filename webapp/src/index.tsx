@@ -8,20 +8,19 @@ import { JsSignatureProvider } from 'eosjs/dist/eosjs-jssig';
 
 const rpc = new JsonRpc(''); // nodeos and web server are on same port
 
-interface PostData {
-    id?: number;
-    user?: string;
-    reply_to?: number;
-    content?: string;
+interface WelcomeData {
+    host?: string;
+    opponent?: string;
 };
 
 interface PostFormState {
     privateKey: string;
-    data: PostData;
+    data: WelcomeData;
+    succeed: string;
     error: string;
 };
 
-class PostForm extends React.Component<{}, PostFormState> {
+class WelcomeForm extends React.Component<{}, PostFormState> {
     api: Api;
 
     constructor(props: {}) {
@@ -30,16 +29,15 @@ class PostForm extends React.Component<{}, PostFormState> {
         this.state = {
             privateKey: '5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3',
             data: {
-                id: 0,
-                user: 'bob',
-                reply_to: 0,
-                content: 'This is a test'
+                host: 'tictactoe',
+                opponent: 'bob',
             },
+            succeed: '',
             error: '',
         };
     }
 
-    setData(data: PostData) {
+    setData(data: WelcomeData) {
         this.setState({ data: { ...this.state.data, ...data } });
     }
 
@@ -49,10 +47,10 @@ class PostForm extends React.Component<{}, PostFormState> {
             const result = await this.api.transact(
                 {
                     actions: [{
-                        account: 'talk',
-                        name: 'post',
+                        account: 'tictactoe',
+                        name: 'welcome',
                         authorization: [{
-                            actor: this.state.data.user,
+                            actor: this.state.data.host,
                             permission: 'active',
                         }],
                         data: this.state.data,
@@ -62,8 +60,10 @@ class PostForm extends React.Component<{}, PostFormState> {
                     expireSeconds: 30,
                 });
             console.log(result);
+            this.setState({ succeed:'Ok'});
             this.setState({ error: '' });
         } catch (e) {
+            this.setState({succeed: ''});
             if (e.json)
                 this.setState({ error: JSON.stringify(e.json, null, 4) });
             else
@@ -87,30 +87,27 @@ class PostForm extends React.Component<{}, PostFormState> {
                         <td>User</td>
                         <td><input
                             style={{ width: 500 }}
-                            value={this.state.data.user}
-                            onChange={e => this.setData({ user: e.target.value })}
+                            value={this.state.data.host}
+                            onChange={e => this.setData({ host: e.target.value })}
                         /></td>
                     </tr>
                     <tr>
-                        <td>Reply To</td>
+                        <td>Opponent</td>
                         <td><input
                             style={{ width: 500 }}
-                            value={this.state.data.reply_to}
-                            onChange={e => this.setData({ reply_to: +e.target.value })}
-                        /></td>
-                    </tr>
-                    <tr>
-                        <td>Content</td>
-                        <td><input
-                            style={{ width: 500 }}
-                            value={this.state.data.content}
-                            onChange={e => this.setData({ content: e.target.value })}
+                            value={this.state.data.opponent}
+                            onChange={e => this.setData({ opponent: e.target.value })}
                         /></td>
                     </tr>
                 </tbody>
             </table>
             <br />
             <button onClick={e => this.post()}>Post</button>
+            {this.state.succeed && <div>
+                <br />
+                Succeed:
+                <code><pre>{this.state.succeed}</pre></code>
+            </div>}            
             {this.state.error && <div>
                 <br />
                 Error:
@@ -120,55 +117,9 @@ class PostForm extends React.Component<{}, PostFormState> {
     }
 }
 
-class Messages extends React.Component<{}, { content: string }> {
-    interval: number;
-
-    constructor(props: {}) {
-        super(props);
-        this.state = { content: '///' };
-    }
-
-    componentDidMount() {
-        this.interval = window.setInterval(async () => {
-            try {
-                const rows = await rpc.get_table_rows({
-                    json: true, code: 'talk', scope: '', table: 'message', limit: 1000,
-                });
-                let content =
-                    'id          reply_to      user          content\n' +
-                    '=============================================================\n';
-                for (let row of rows.rows)
-                    content +=
-                        (row.id + '').padEnd(12) +
-                        (row.reply_to + '').padEnd(12) + '  ' +
-                        row.user.padEnd(14) +
-                        row.content + '\n';
-                this.setState({ content });
-            } catch (e) {
-                if (e.json)
-                    this.setState({ content: JSON.stringify(e.json, null, 4) });
-                else
-                    this.setState({ content: '' + e });
-            }
-
-        }, 200);
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.interval);
-    }
-
-    render() {
-        return <code><pre>{this.state.content}</pre></code>;
-    }
-}
-
 ReactDOM.render(
     <div>
-        <PostForm />
-        <br />
-        Messages:
-        <Messages />
+        <WelcomeForm />
     </div>,
-    document.getElementById("example")
+    document.getElementById("body")
 );
