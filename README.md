@@ -10,6 +10,10 @@ welcome (name host, name opponent)
 - welcome only prints a simple message:
 "Welcome, <host> and <opponent>!"
 
+- restart( const name &challenger, const name &host, const name &by );
+
+- move( const name &challenger, const name &host, const name &by, const uint16_t &row, const uint16_t &column );
+
 # Setup
 
 1. Fork this repo to your personal GitHub account so that you can save your work into your personal Github account.
