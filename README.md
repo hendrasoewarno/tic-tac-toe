@@ -72,7 +72,18 @@ cleos push action tictactoe restart '[jane, bob, bob]' -p bob
 
 cleos get table tictactoe tictactoe game
 
-#move
+#move Ok
+cleos push action tictactoe move '[jane, bob, bob, 1,0]' -p bob
+
+#invalid move
+cleos push action tictactoe move '[jane, bob, bob, 1,0]' -p bob
+
+#move Ok
+cleos push action tictactoe move '[jane, bob, jane, 0,0]' -p jane
+cleos push action tictactoe move '[jane, bob, bob, 1,1]' -p bob
+cleos push action tictactoe move '[jane, bob, jane, 0,1]' -p jane
+cleos push action tictactoe move '[jane, bob, bob, 1,2]' -p bob
+cleos push action tictactoe move '[jane, bob, jane, 0,2]' -p jane
 
 #Ok
 cleos push action tictactoe close '[jane, bob]' -p bob
