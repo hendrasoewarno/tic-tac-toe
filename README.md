@@ -65,14 +65,21 @@ cleos push action tictactoe create '[jane, bob]' -p bob
 #pair already exists
 cleos push action tictactoe create '[bob, jane]' -p jane
 
+cleos get table tictactoe tictactoe pool
+
+#start game
+cleos push action tictactoe restart '[jane, bob, bob]' -p bob
+
+cleos get table tictactoe tictactoe game
+
+#move
+
 #Ok
 cleos push action tictactoe close '[jane, bob]' -p bob
 or
 cleos push action tictactoe close '[bob, jane]' -p jane
 #pair not found
 cleos push action tictactoe close '[jane, bob]' -p bob
-
-cleos get table tictactoe tictactoe pool
 
 ```
 
