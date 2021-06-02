@@ -67,14 +67,14 @@ CONTRACT tictactoe : public contract {
 
     TABLE leader_board {
       name winner;
-      uint32_t count;
+      uint64_t count;
       uint64_t primary_key() const {return winner.value;}
-      uint32_t secondary_key() const {return -count;}
+      uint64_t secondary_key() const {return -count;}
       EOSLIB_SERIALIZE(leader_board, (winner)(count))
     };
 
     typedef eosio::multi_index<name("leader"), leader_board,
-      eosio::indexed_by<name("leaderskey"), eosio::const_mem_fun<leader_board, uint32_t, &leader_board::secondary_key>>
+      eosio::indexed_by<name("leaderskey"), eosio::const_mem_fun<leader_board, uint64_t, &leader_board::secondary_key>>
     > leader_index;    
 
     // Use contract's constructor

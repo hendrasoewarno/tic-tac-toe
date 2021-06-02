@@ -87,7 +87,11 @@ cleos push action tictactoe move '[jane, bob, jane, 0,0]' -p jane
 cleos push action tictactoe move '[jane, bob, bob, 1,1]' -p bob
 cleos push action tictactoe move '[jane, bob, jane, 0,1]' -p jane
 cleos push action tictactoe move '[jane, bob, bob, 1,2]' -p bob
+
+#game over!
 cleos push action tictactoe move '[jane, bob, jane, 0,2]' -p jane
+
+cleos get table tictactoe tictactoe leader
 
 #Ok
 cleos push action tictactoe close '[jane, bob]' -p bob
