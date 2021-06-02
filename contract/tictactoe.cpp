@@ -69,7 +69,7 @@ CONTRACT tictactoe : public contract {
       name winner;
       uint32_t count;
       uint64_t primary_key() const {return winner.value;}
-      uint32_t secondary_key() const {return -count);}
+      uint32_t secondary_key() const {return -count;}
       EOSLIB_SERIALIZE(leader_board, (winner)(count))
     };
 
@@ -144,12 +144,12 @@ CONTRACT tictactoe : public contract {
       _game.modify(*itr, same_payer, [&]( auto& game ) {
         check(game.is_valid_movement(by, row, col), "invalid movement!");  
       });
-      if (*itr.winner!=name()) {
+      if ((*itr).winner!=name()) {
         leader_index _leader(get_self(), get_self().value);
-        auto itrl = _leader.find(*itr.winner);
+        auto itrl = _leader.find((*itr).winner.value);
         if (itrl == _leader.end()) {
           _leader.emplace(get_first_receiver(), [&](auto& leader) { 
-            leader.winner=*itr.winner;
+            leader.winner=(*itr).winner;
             leader.count=1;
           });
         }
