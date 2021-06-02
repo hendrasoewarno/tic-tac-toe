@@ -154,7 +154,7 @@ CONTRACT tictactoe : public contract {
           });
         }
         else {
-          _game.modify(*itrl, same_payer, [&]( auto& leader) {          
+          _leader.modify(*itrl, same_payer, [&]( auto& leader) {          
             leader.count++;
           });
         }
