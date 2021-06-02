@@ -63,19 +63,7 @@ CONTRACT tictactoe : public contract {
 
     typedef eosio::multi_index<name("game"), game_record,
       eosio::indexed_by<name("gameskey"), eosio::const_mem_fun<game_record, uint128_t, &game_record::secondary_key>>
-    > game_index;
-
-    TABLE leader_board {
-      name winner;
-      uint32_t count;
-      uint64_t primary_key() const {return winner.value;}
-      uint32_t secondary_key() const {return -count);}
-      EOSLIB_SERIALIZE(leader_board, (winner)(count))
-    };
-
-    typedef eosio::multi_index<name("leader"), leader_board,
-      eosio::indexed_by<name("leaderskey"), eosio::const_mem_fun<leader_board, uint32_t, &leader_board::secondary_key>>
-    > leader_index;    
+    > game_index;    
 
     // Use contract's constructor
     using contract::contract;
@@ -144,21 +132,6 @@ CONTRACT tictactoe : public contract {
       _game.modify(*itr, same_payer, [&]( auto& game ) {
         check(game.is_valid_movement(by, row, col), "invalid movement!");  
       });
-      if (*itr.winner!=name()) {
-        leader_index _leader(get_self(), get_self().value);
-        auto itrl = _leader.find(*itr.winner);
-        if (itrl == _leader.end()) {
-          _leader.emplace(get_first_receiver(), [&](auto& leader) { 
-            leader.winner=*itr.winner;
-            leader.count=1;
-          });
-        }
-        else {
-          _game.modify(*itrl, same_payer, [&]( auto& leader) {          
-            leader.count++;
-          });
-        }
-      }
     }
 
     ACTION close(name challenger, name host) {
