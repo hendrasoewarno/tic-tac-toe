@@ -8,10 +8,23 @@ using namespace std;
 CONTRACT tictactoe : public contract {
   public:    
 
+    TABLE pool_record {
+      name host;
+      name challenger;
+
+      uint64_t primary_key() const {return host.value;}
+      uint128_t secondary_key() const {return combine_ids(host.value,challenger.value);}
+      EOSLIB_SERIALIZE(pool_record, (host)(challenger))
+    };
+
+    typedef eosio::multi_index<name("pool"), pool_record,
+      eosio::indexed_by<name("poolskey"), eosio::const_mem_fun<pool_record, uint128_t, &pool_record::secondary_key>>
+    > pool_index;
+
     TABLE game_record {
       uint64_t id;
       vector<std::uint8_t> board{0,0,0,0,0,0,0,0,0};
-      name challenger;      
+      name challenger;
       name host;
       name turn;
       name winner;
@@ -78,44 +91,55 @@ CONTRACT tictactoe : public contract {
         check(host!=challenger, "Could not challenge youself!");
         //check(is_account(challenger),"challenger account not found");
 
-        game_index _game(get_self(), get_self().value);
+        pool_index _pool(get_self(), get_self().value);
         //find using secondary key
-        auto _gameskey = _game.get_index<name("gameskey")>(); //set secondary key
-        auto itrh = _gameskey.find(combine_ids(host.value, challenger.value));
-        auto itrc = _gameskey.find(combine_ids(challenger.value, host.value));
-        check(itrh==_gameskey.end() && itrc==_gameskey.end(), "game already exists!"); //if found
+        auto _poolskey = _pool.get_index<name("poolskey")>(); //set secondary key
+        auto itrh = _poolskey.find(combine_ids(host.value, challenger.value));
+        auto itrc = _poolskey.find(combine_ids(challenger.value, host.value));
+        check(itrh==_poolskey.end() && itrc==_poolskey.end(), "pair already exists!"); //if found
         
         //ram charge to action caller
-        _game.emplace(get_first_receiver(), [&](auto& game) { 
-          game.host = host;
-          game.challenger = challenger;
-          game.turn = host;
+        _pool.emplace(get_first_receiver(), [&](auto& pair) { 
+          pair.host = host;
+          pair.challenger = challenger;
         });
     }
 
     ACTION restart(name challenger, name host, name by) {      
-      check(has_auth(by), "please auth before!");
+      check(has_auth(host) || has_auth(challenger), "please auth yourself!");
       check(by==challenger || by==host, "only challenger or host can restart game!");
+      check(game_exists(challenger, host), "game not found!");
       game_index _game(get_self(), get_self().value);
       auto _gameskey = _game.get_index<name("gameskey")>();
-      auto itr = _gameskey.find(combine_ids(host.value, challenger.value));
-      check(itr!=_gameskey.end(),"create game first!");
-      _game.modify(*itr, same_payer, [&]( auto& game ) {          
-        fill(game.board.begin(), game.board.end(), 0);   
-        game.turn=by;
-        game.winner=name();
-      });
+      auto itr = _gameskey.find(combine_ids(host.value, challenger.value));          
+      if (itr==_gameskey.end()) {
+        //ram charge to same_payer
+        _game.emplace(get_first_receiver(), [&](auto& game) { 
+          game.id = _game.available_primary_key();
+          //fill(game.board.begin(), game.board.end(), 0);
+          game.challenger=challenger;
+          game.host=host;
+          game.turn=by;
+          game.winner=name();
+        });
+      } else {
+        _game.modify(*itr, same_payer, [&]( auto& game ) {          
+          fill(game.board.begin(), game.board.end(), 0);   
+          game.turn=by;
+          game.winner=name();
+        });
+      }
     }
 
     ACTION move(name challenger, name host, name by, uint16_t row, uint16_t col) {
-      check(has_auth(by), "please auth before!");
-      check(by==challenger || by==host, "only challenger or host can move!");
+      check(has_auth(host) || has_auth(challenger), "please auth yourself!");
+      check(by==challenger || by==host, "only challenger or host can restart game!");
       check(row<3 && col < 3, "invalid row or col!");
+      check(game_exists(challenger, host), "game not found!");
       game_index _game(get_self(), get_self().value);
-      auto _gameskey = _game.get_index<
-      name("gameskey")>();
+      auto _gameskey = _game.get_index<name("gameskey")>();
       auto itr = _gameskey.find(combine_ids(host.value, challenger.value));
-      check(itr!=_gameskey.end(), "create game first!");
+      check(itr!=_gameskey.end(), "restart game first!");
       check((*itr).winner==name(), "game over!");
       _game.modify(*itr, same_payer, [&]( auto& game ) {
         check(game.is_valid_movement(by, row, col), "invalid movement!");  
@@ -140,16 +164,46 @@ CONTRACT tictactoe : public contract {
     ACTION close(name challenger, name host) {
         //find by host (primary key)
         check(has_auth(host) || has_auth(challenger), "please auth yourself!");
+        pool_index _pool(get_self(), get_self().value);
+        //find using secondary key
+        auto _poolskey = _pool.get_index<name("poolskey")>();
+        auto itrc = _poolskey.find(combine_ids(host.value, challenger.value));          
+        if (itrc!=_poolskey.end())
+          _poolskey.erase(itrc);
+
+        //erase child table
         game_index _game(get_self(), get_self().value);
         auto _gameskey = _game.get_index<name("gameskey")>();
-        auto itr = _gameskey.find(combine_ids(host.value, challenger.value));          
-        check(itr!=_gameskey.end(), "game not found!");
-        _gameskey.erase(itr);
+        auto itrgc = _gameskey.find(combine_ids(host.value, challenger.value));          
+        if (itrgc!=_gameskey.end())
+          _gameskey.erase(itrgc);
+
+        else {
+          auto itrp = _poolskey.find(combine_ids(challenger.value, host.value));          
+          if (itrp!=_poolskey.end())
+            _poolskey.erase(itrp);
+
+          //erase child table
+          auto itrgp = _gameskey.find(combine_ids(challenger.value, host.value));
+          if (itrgp!=_gameskey.end())
+            _gameskey.erase(itrgp);            
+
+          else
+            check(false, "pair not found!");
+        }
+
     }    
 
   private:
     // concatenation of ids example
     static uint128_t combine_ids(const uint64_t &x, const uint64_t &y) {
       return (uint128_t{x} << 64) | y;
+    }
+
+    bool game_exists(name challenger, name host) {
+      pool_index _pool(get_self(), get_self().value);
+      auto _poolskey = _pool.get_index<name("poolskey")>();
+      auto itrc = _poolskey.find(combine_ids(host.value, challenger.value));  
+      return (itrc!= _poolskey.end());
     }
 };

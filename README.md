@@ -62,14 +62,14 @@ cleos push action tictactoe welcome '[bob, jane]' -p bob
 #Exercise 2
 #Ok
 cleos push action tictactoe create '[jane, bob]' -p bob
-cleos get table tictactoe bob pool
+cleos get table tictactoe tictactoe game
 
-#pair already exists
+#game already exists
 cleos push action tictactoe create '[jane, bob]' -p bob
 #pair already exists
 cleos push action tictactoe create '[bob, jane]' -p jane
 
-cleos get table tictactoe tictactoe pool
+cleos get table tictactoe tictactoe game
 
 #start game
 cleos push action tictactoe restart '[jane, bob, bob]' -p bob
