@@ -110,3 +110,4 @@ The source code for the React WebApp is at `webapp/src/index.tsx` within the IDE
 gp preview $(gp url 8000)
 
 ```
+  https://cyan-puffin-o5u3fy3h.ws-us08.gitpod.io/
