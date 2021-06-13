@@ -2,10 +2,18 @@
 
 Create a Tic Tac Toe 
 - Welcome action can only be taken by contract account
+- create( const name &challenger, name &host );
+- close( const name &challenger, const name &host );
 - restart( const name &challenger, const name &host, const name &by );
 - move( const name &challenger, const name &host, const name &by, const uint16_t &row, const uint16_t &column ); 
 - Create an appropriate Ricardian Contract for each of your contract's actions.
 - Win/loss tracking and leaderboard 
+
+Require the host’s authorization, and make sure the host and challenger aren’t the same player – and that a game doesn’t already exist between them. Game flow: the host user creates a game – which sets them as host, with the challenger they input  – and then posts a move Submit your expanded Tic Tac Toe smart contract. Include one or more of the following additional features:
+
+    Time limit for moves
+    Win/loss tracking and leaderboard
+    "Best of" game sets
 
 # Setup
 
