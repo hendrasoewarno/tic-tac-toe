@@ -15,7 +15,7 @@ Require the hostâ€™s authorization, and make sure the host and challenger arenâ€
     Win/loss tracking and leaderboard
     "Best of" game sets
 
-# Setup
+## Setup
 
 1. Fork this repo to your personal GitHub account so that you can save your work into your personal Github account.
 
