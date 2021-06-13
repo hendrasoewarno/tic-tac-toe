@@ -1,24 +1,17 @@
-# Exercise
+# Exercise Smart Contract 101
 
-Create a Tic Tac Toe Smart Contract
-
-- For now, one single action:
-welcome (name host, name opponent)
-
+Create a Tic Tac Toe 
 - Welcome action can only be taken by contract account
-
-- welcome only prints a simple message:
-"Welcome, <host> and <opponent>!"
-
 - restart( const name &challenger, const name &host, const name &by );
-
-- move( const name &challenger, const name &host, const name &by, const uint16_t &row, const uint16_t &column );
+- move( const name &challenger, const name &host, const name &by, const uint16_t &row, const uint16_t &column ); 
+- Create an appropriate Ricardian Contract for each of your contract's actions.
+- Win/loss tracking and leaderboard 
 
 # Setup
 
 1. Fork this repo to your personal GitHub account so that you can save your work into your personal Github account.
 
-2. Point your browser to the following URL https://gitpod.io/#https://github.com/your-github-account/tic-tac-toe to start the IDE. You will be automatically prompted to create a Gitpod account (all types of Gitpod accounts (including free) will work). You can also choose to provide multiple developers push access to your personal github fork of this repo to collaborate with them (one developer working on the smart contract (C++) while the other working on the front-end decentralized application (EOSJS), etc.). Each such developer sharing access to the forked repo will get their own copy of the EOSIO blockchain components to enable independent development.
+2. Open https://gitpod.io#your_github_repo
 
 ## Building sample contract
 
@@ -101,13 +94,3 @@ cleos push action tictactoe close '[bob, jane]' -p jane
 cleos push action tictactoe close '[jane, bob]' -p bob
 
 ```
-
-## Viewing the front-end decentralized web app (EOSJS):
-
-The source code for the React WebApp is at `webapp/src/index.tsx` within the IDE. To preview the WebApp run this in a terminal:
-
-```
-gp preview $(gp url 8000)
-
-```
-  https://cyan-puffin-o5u3fy3h.ws-us08.gitpod.io/
